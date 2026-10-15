@@ -1,0 +1,33 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+issueTrackerURL = "https://github.com/squi2rel/ArcLib/issues"
+license = "Apache-2.0"
+
+[[mods]]
+modId = "arclib"
+version = "${version}"
+displayName = "ArcLib"
+displayTest = "IGNORE_ALL_VERSION"
+displayURL = "https://github.com/squi2rel/ArcLib"
+authors = "squi2rel"
+description = '''
+Arc runtime for Minecraft.
+'''
+logoFile = "assets/arclib/icon.png"
+
+[[dependencies.arclib]]
+modId = "forge"
+mandatory = true
+versionRange = "[47.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.arclib]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1]"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "arclib.mixins.json"

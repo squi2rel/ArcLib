@@ -1,0 +1,15 @@
+rootProject.name = 'arclib'
+
+includeBuild('common') {
+    name = 'arclib-common-build'
+}
+
+includeBuild('bukkit') {
+    name = 'arclib-bukkit'
+}
+
+['1.20.1', '1.21.1', '1.21.11', '26.2'].each { minecraftVersion ->
+    includeBuild(minecraftVersion) {
+        name = "arclib-$minecraftVersion"
+    }
+}

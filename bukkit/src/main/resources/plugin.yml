@@ -1,0 +1,7 @@
+name: ArcLib
+version: '${version}'
+main: com.github.squi2rel.arc.bukkit.ArcLibPlugin
+api-version: '1.20'
+description: Arc headless runtime and JavaScript API for Bukkit servers.
+authors: [ squi2rel ]
+website: https://github.com/squi2rel/ArcLib

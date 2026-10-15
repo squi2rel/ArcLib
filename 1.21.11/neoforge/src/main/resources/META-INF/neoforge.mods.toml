@@ -1,0 +1,30 @@
+issueTrackerURL = "https://github.com/squi2rel/ArcLib/issues"
+license = "Apache-2.0"
+
+[[mods]]
+modId = "arclib"
+version = "${version}"
+displayName = "ArcLib"
+displayURL = "https://github.com/squi2rel/ArcLib"
+authors = "squi2rel"
+description = '''
+Arc runtime for Minecraft.
+'''
+logoFile = "assets/arclib/icon.png"
+
+[[dependencies.arclib]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.11.48,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.arclib]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.11]"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "arclib.mixins.json"

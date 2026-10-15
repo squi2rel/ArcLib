@@ -1,0 +1,71 @@
+plugins { id 'base' }
+
+def wrapper = rootProject.file('gradlew').absolutePath
+def minecraftVersions = ['1.20.1', '1.21.1', '1.21.11', '26.2']
+
+def commonBuild = tasks.register('buildCommon', Exec) {
+    workingDir rootProject.projectDir
+    commandLine wrapper, '-p', 'common', 'build', '--console=plain'
+}
+
+def versionBuilds = []
+minecraftVersions.each { mc ->
+    def previous = versionBuilds ? versionBuilds.last() : commonBuild
+    versionBuilds.add(tasks.register("buildMinecraft${mc.replace('.', '')}", Exec) {
+        dependsOn commonBuild
+        mustRunAfter previous
+        workingDir rootProject.projectDir
+        commandLine wrapper, '-p', mc, 'build', '--console=plain'
+    })
+}
+
+def bukkitBuild = tasks.register('buildBukkit', Exec) {
+    dependsOn commonBuild
+    mustRunAfter versionBuilds
+    workingDir rootProject.projectDir
+    commandLine wrapper, '-p', 'bukkit', 'build', '--console=plain'
+}
+
+def mainJars = minecraftVersions.collectMany { mc ->
+    def properties = new Properties()
+    file("$mc/gradle.properties").withInputStream { properties.load(it) }
+    ['fabric', 'forge', 'neoforge'].findAll { file("$mc/$it/build.gradle").isFile() }.collect { loader ->
+        file("$mc/$loader/build/libs/${properties.archives_name}-$mc-$loader-${properties.mod_version}.jar")
+    }
+}
+
+mainJars.add(file('bukkit/build/libs/arclib-bukkit-1.0.0.jar'))
+
+def collectJars = tasks.register('collectJars', Sync) {
+    group = 'build'
+    description = 'Collects mod and Bukkit plugin jars into build/libs for uploading.'
+    dependsOn versionBuilds, bukkitBuild
+    from mainJars
+    into layout.buildDirectory.dir('libs')
+    duplicatesStrategy = DuplicatesStrategy.FAIL
+    doFirst {
+        mainJars.each { jar ->
+            if (!jar.isFile()) throw new GradleException("Missing artifact: $jar")
+        }
+    }
+}
+
+tasks.register('buildAll') {
+    group = 'build'
+    description = 'Builds common, all supported mod targets and the Bukkit plugin.'
+    dependsOn collectJars
+}
+
+tasks.named('build') { dependsOn tasks.named('buildAll') }
+
+tasks.register('cleanAll') {
+    group = 'build'
+    doLast {
+        delete layout.buildDirectory
+        delete file('common/build')
+        delete file('bukkit/build')
+        minecraftVersions.each { mc ->
+            ['bridge', 'fabric', 'forge', 'neoforge'].each { module -> delete file("$mc/$module/build") }
+        }
+    }
+}

@@ -1,0 +1,81 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'com.github.squi2rel.arclib'
+version = '1.0.0'
+
+base {
+    archivesName = 'arclib-common'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    api 'org.mozilla:rhino:1.9.1'
+    compileOnly 'org.slf4j:slf4j-api:2.0.17'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+    testRuntimeOnly 'org.slf4j:slf4j-api:2.0.17'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+tasks.register('verifyCommonIsolation') {
+    group = 'verification'
+    description = 'Ensures the shared Arc sources have no Minecraft or loader dependencies.'
+    inputs.files(fileTree('src/main/java') { include '**/*.java' })
+    doLast {
+        def forbidden = [
+            'net.minecraft',
+            'com.mojang',
+            'net.fabricmc',
+            'net.neoforged',
+            'org.spongepowered.asm.mixin',
+            'arc.backend.minecraft',
+            'org.bukkit',
+            'io.papermc.paper'
+        ]
+        def violations = []
+        inputs.files.files.sort().each { source ->
+            source.eachLine { line, number ->
+                forbidden.each { name ->
+                    if (line.contains(name)) violations << "${source}:$number: $line"
+                }
+            }
+        }
+        if (!violations.empty) {
+            throw new GradleException("Common source isolation failed:\n" + violations.join('\n'))
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyCommonIsolation')
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'arclib-common'
+            from components.java
+        }
+    }
+}

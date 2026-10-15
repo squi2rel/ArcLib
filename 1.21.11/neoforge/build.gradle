@@ -1,0 +1,11 @@
+plugins { id 'com.gradleup.shadow' }
+
+architectury { platformSetupLoomIde(); neoForge() }
+repositories { maven { url = 'https://maven.neoforged.net/releases/' } }
+dependencies {
+    neoForge "net.neoforged:neoforge:$rootProject.neoforge_version"
+    implementation "org.mozilla:rhino:$rootProject.rhino_version"
+    forgeRuntimeLibrary "org.mozilla:rhino:$rootProject.rhino_version"
+    include "org.mozilla:rhino:$rootProject.rhino_version"
+}
+apply from: rootProject.file('../gradle/loader-packaging.gradle')
