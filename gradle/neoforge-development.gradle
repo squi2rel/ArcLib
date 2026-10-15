@@ -1,0 +1,22 @@
+// Common and bridge share packages. Keep them in one development mod so FML's module loader
+// can resolve every public API, matching the layout of the final shaded loader jar.
+configurations {
+    developmentCommon {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+def developmentBundle = tasks.register('developmentBundle', Jar) {
+    archiveClassifier = 'development-common'
+    destinationDirectory = layout.buildDirectory.dir('devlibs')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn configurations.developmentCommon
+    from { configurations.developmentCommon.collect { zipTree(it) } }
+}
+
+dependencies {
+    developmentCommon project(path: ':bridge', configuration: 'namedElements')
+    developmentCommon "com.github.squi2rel.arclib:arclib-common:$rootProject.common_version"
+    common files(developmentBundle)
+}

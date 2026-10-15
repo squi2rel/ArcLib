@@ -1,0 +1,24 @@
+{
+  "minVersion": "0.8.7",
+  "required": true,
+  "package": "com.github.squi2rel.arc.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "server": [
+    "MinecraftServerMixin"
+  ],
+  "client": [
+    "CursorTypeInvoker",
+    "FontManagerMixin",
+    "GameRendererMixin",
+    "GuiGraphicsExtractorMixin",
+    "KeyboardHandlerMixin",
+    "MinecraftMixin",
+    "MouseHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

@@ -1,0 +1,27 @@
+plugins {
+    id 'net.neoforged.moddev'
+}
+
+// Compile the vanilla bridge in this loader too so development has a single mod module.
+sourceSets.main {
+    java.srcDirs '../bridge/src/main/java', '../../common/src/main/java'
+    resources.srcDirs '../bridge/src/main/resources', '../../common/src/main/resources'
+}
+neoForge {
+    version = rootProject.neoforge_version
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
+    }
+    mods { arclib { sourceSet sourceSets.main } }
+}
+dependencies {
+    implementation "org.mozilla:rhino:$rootProject.rhino_version"
+    jarJar("org.mozilla:rhino:$rootProject.rhino_version") {
+        version { strictly "[$rootProject.rhino_version,1.8)"; prefer rootProject.rhino_version }
+    }
+}
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('META-INF/neoforge.mods.toml') { expand version: project.version }
+}

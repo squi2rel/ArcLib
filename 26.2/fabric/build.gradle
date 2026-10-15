@@ -1,0 +1,35 @@
+plugins {
+    id 'net.fabricmc.fabric-loom'
+}
+
+configurations {
+    shadowBundle { canBeResolved = true; canBeConsumed = false }
+}
+dependencies {
+    minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
+    implementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+    implementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+    implementation project(':bridge')
+    implementation "com.github.squi2rel.arclib:arclib-common:$rootProject.common_version"
+    include "org.mozilla:rhino:$rootProject.rhino_version"
+    shadowBundle(project(':bridge')) { transitive = false }
+    shadowBundle("com.github.squi2rel.arclib:arclib-common:$rootProject.common_version") { transitive = false }
+}
+loom {
+    mods {
+        arclib {
+            sourceSet sourceSets.main
+            sourceSet project(':bridge').sourceSets.main
+        }
+    }
+}
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+// Loom adds nested Rhino and its metadata to the regular jar task.
+jar {
+    dependsOn configurations.shadowBundle
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.shadowBundle.collect { zipTree(it) } }
+}
